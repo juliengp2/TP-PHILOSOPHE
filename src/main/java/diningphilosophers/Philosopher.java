@@ -34,22 +34,35 @@ public class Philosopher extends Thread {
             try {
                 think();
                 // Aléatoirement prendre la baguette de gauche puis de droite ou l'inverse
+                boolean leftTaken = false;
+                boolean rightTaken = false;
                 switch(new Random().nextInt(2)) {
                     case 0:
-                        myLeftStick.take();
+                        leftTaken = myLeftStick.take();
                         think(); // pour augmenter la probabilité d'interblocage
-                        myRightStick.take();
+                        if (leftTaken) { // seulement si la baguette de gauche a été prise
+                            rightTaken = myRightStick.take();
+                        }
                         break;
                     case 1:
-                        myRightStick.take();
+                        rightTaken = myRightStick.take();
                         think(); // pour augmenter la probabilité d'interblocage
-                        myLeftStick.take();
+                        if (rightTaken) { // seulement si la baguette de droite a été prise
+                            leftTaken = myLeftStick.take();
+                        }
                 }
                 // Si on arrive ici, on a pu "take" les 2 baguettes
-                eat();
-                // On libère les baguettes :
-                myLeftStick.release();
-                myRightStick.release();
+                if (leftTaken && rightTaken) {
+                    eat();
+                    // On libère les baguettes :
+                    myLeftStick.release();
+                    myRightStick.release();
+                }
+                else{
+                    // On libère les baguettes :
+                    if (leftTaken) myLeftStick.release();
+                    if (rightTaken) myRightStick.release();
+                }
                 // try again
             } catch (InterruptedException ex) {
                 Logger.getLogger("Table").log(Level.SEVERE, "{0} Interrupted", this.getName());
